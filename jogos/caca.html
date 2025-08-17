@@ -1,1 +1,49 @@
-<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Caça-Palavras</title><link rel="stylesheet" href="../css/style.css"><style>#grid{display:grid;grid-template-columns:repeat(6,60px);grid-gap:5px;justify-content:center;margin:20px auto}.cell{width:60px;height:60px;background:#ddd;font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px}.selected{background:#6C63FF;color:white}.found{background:#4CAF50;color:white}</style></head><body><h1>Caça-Palavras</h1><p style="font-size:24px;">Encontre: casa, amor, vida, fé, paz</p><div id="grid"></div><p id="status" style="font-size:28px;"></p><br><button onclick="location.href='menu.html'">Voltar</button><script>const words=['casa','amor','vida','fé','paz'];const letters=[['C','A','S','A','X','O'],['B','A','M','O','R','Q'],['V','I','D','A','L','M'],['P','A','Z','T','E','F'],['F','E','X','Y','Z','U'],['R','S','G','H','J','K']];const grid=document.getElementById('grid');let selectedCells=[];letters.forEach((row,i)=>{row.forEach((letter,j)=>{const div=document.createElement('div');div.className='cell';div.textContent=letter;div.dataset.pos=i+'-'+j;div.addEventListener('click',()=>{if(div.classList.contains('found'))return;if(div.classList.contains('selected')){div.classList.remove('selected');selectedCells=selectedCells.filter(c=>c!==div);}else{div.classList.add('selected');selectedCells.push(div);}checkWord();});grid.appendChild(div);});});function checkWord(){const current=selectedCells.map(c=>c.textContent).join('').toLowerCase();if(words.includes(current)){selectedCells.forEach(c=>{c.classList.add('found');c.classList.remove('selected');});selectedCells=[];if(document.querySelectorAll('.found').length>=20){document.getElementById('status').textContent='Parabéns! Encontrou todas!';}}}</script></body></html>
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Caça-Palavras</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(6, 60px);
+            grid-gap: 5px;
+            justify-content: center;
+            margin: 20px auto
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background: #ddd;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 8px
+        }
+
+        .selected {
+            background: #6C63FF;
+            color: white
+        }
+
+        .found {
+            background: #4CAF50;
+            color: white
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Caça-Palavras</h1>
+    <p style="font-size:24px;">Encontre: casa, amor, vida, fé, paz</p>
+    <div id="grid"></div>
+    <p id="status" style="font-size:28px;"></p><br><button onclick="location.href='menu.html'">Voltar</button>
+    <script>const words = ['casa', 'amor', 'vida', 'fé', 'paz']; const letters = [['C', 'A', 'S', 'A', 'X', 'O'], ['B', 'A', 'M', 'O', 'R', 'Q'], ['V', 'I', 'D', 'A', 'L', 'M'], ['P', 'A', 'Z', 'T', 'E', 'F'], ['F', 'E', 'X', 'Y', 'Z', 'U'], ['R', 'S', 'G', 'H', 'J', 'K']]; const grid = document.getElementById('grid'); let selectedCells = []; letters.forEach((row, i) => { row.forEach((letter, j) => { const div = document.createElement('div'); div.className = 'cell'; div.textContent = letter; div.dataset.pos = i + '-' + j; div.addEventListener('click', () => { if (div.classList.contains('found')) return; if (div.classList.contains('selected')) { div.classList.remove('selected'); selectedCells = selectedCells.filter(c => c !== div); } else { div.classList.add('selected'); selectedCells.push(div); } checkWord(); }); grid.appendChild(div); }); }); function checkWord() { const current = selectedCells.map(c => c.textContent).join('').toLowerCase(); if (words.includes(current)) { selectedCells.forEach(c => { c.classList.add('found'); c.classList.remove('selected'); }); selectedCells = []; if (document.querySelectorAll('.found').length >= 20) { document.getElementById('status').textContent = 'Parabéns! Encontrou todas!'; } } }</script>
+</body>
+
+</html>
