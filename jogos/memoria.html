@@ -35,7 +35,40 @@
 <body>
     <h1>Jogo da Memória</h1>
     <div class="grid" id="grid"></div><br><button onclick="location.href='menu.html'">Voltar</button>
-    <script>const words = ['casa', 'amor', 'vida', 'fé', 'paz', 'mar', 'sol', 'lua']; let cards = [...words, ...words]; cards.sort(() => 0.5 - Math.random()); const grid = document.getElementById('grid'); let first = null; let lock = false; cards.forEach(word => { const div = document.createElement('div'); div.className = 'card hidden'; div.textContent = word; div.addEventListener('click', () => { if (lock || !div.classList.contains('hidden')) return; div.classList.remove('hidden'); if (!first) { first = div; } else { if (first.textContent === div.textContent) { first = null; } else { lock = true; setTimeout(() => { first.classList.add('hidden'); div.classList.add('hidden'); first = null; lock = false; }, 1000); } } }); grid.appendChild(div); });</script>
+    <script>
+        const words = ['casa', 'amor', 'vida', 'fé', 'paz', 'mar', 'sol', 'lua'];
+        let cards = [...words, ...words];
+        cards.sort(() => 0.5 - Math.random());
+        const grid = document.getElementById('grid');
+        let first = null;
+        let lock = false;
+        cards.forEach(word => {
+            const div = document.createElement('div');
+            div.className = 'card hidden';
+            div.textContent = word;
+            div.addEventListener('click', () => {
+                if (lock || !div.classList.contains('hidden')) return;
+                div.classList.remove('hidden');
+                if (!first) {
+                    first = div;
+
+                } else {
+                    if (first.textContent === div.textContent) {
+                        first = null;
+                    } else {
+                        lock = true;
+                        setTimeout(() => {
+                            first.classList.add('hidden');
+                            div.classList.add('hidden');
+                            first = null;
+                            lock = false;
+                        }, 1000);
+                    }
+                }
+            });
+            grid.appendChild(div);
+        });
+    </script>
 </body>
 
 </html>

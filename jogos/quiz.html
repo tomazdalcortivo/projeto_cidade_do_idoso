@@ -12,7 +12,26 @@
     <p style="font-size:28px;">Pressione a tecla mostrada</p>
     <h2 id="target" style="font-size:48px;color:#4CAF50;"></h2>
     <p id="result" style="font-size:28px;"></p><br><button onclick="location.href='menu.html'">Voltar</button>
-    <script>const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; const targetEl = document.getElementById('target'); const resultEl = document.getElementById('result'); function newLetter() { targetEl.textContent = letters[Math.floor(Math.random() * letters.length)]; } document.addEventListener('keydown', e => { if (e.key.toUpperCase() === targetEl.textContent) { resultEl.textContent = 'Correto!'; resultEl.style.color = 'green'; newLetter(); } else { resultEl.textContent = 'Tente novamente...'; resultEl.style.color = 'red'; } }); newLetter();</script>
+    
+    <script>
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const targetEl = document.getElementById('target');
+        const resultEl = document.getElementById('result');
+        function newLetter() {
+            targetEl.textContent = letters[Math.floor(Math.random() * letters.length)];
+
+        } document.addEventListener('keydown', e => {
+            if (e.key.toUpperCase() === targetEl.textContent) {
+                resultEl.textContent = 'Correto!';
+                resultEl.style.color = 'green';
+                newLetter();
+            } else {
+                resultEl.textContent = 'Tente novamente...';
+                resultEl.style.color = 'red';
+            }
+        });
+        newLetter();
+    </script>
 </body>
 
 </html>
