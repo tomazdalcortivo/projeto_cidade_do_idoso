@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>História Interativa</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/script.js"></script>
+</head>
+
+<body>
+    <h1>Vamos criar sua historinha!</h1>
+    <div class="container">
+
+        <p style="font-size:28px;">Qual é o seu nome?</p>
+        <input type="text" id="input1" placeholder="Digite seu nome...">
+        
+        <p style="font-size:28px;">Qual é a sua idade?</p>
+        <input type="text" id="input2" placeholder="Digite sua idade...">
+        
+        <p style="font-size:28px;">Qual é sua cidade favorita?</p>
+        <input type="text" id="input3" placeholder="Digite sua cidade...">
+        
+        <p style="font-size:28px;">Qual é seu animal favorito?</p>
+        <input type="text" id="input4" placeholder="Digite seu animal favorito...">
+        
+        <p style="font-size:28px;">Qual é sua comida favorita?</p>
+        <input type="text" id="input5" placeholder="Digite sua comida favorita...">
+
+        <br><br>
+        <button onclick="gerarHistoria()">Gerar Histórinha</button>
+
+        <p id="historia"></p>
+
+        <br><button onclick="location.href='menu.html'">Voltar ao Menu</button>
+    </div>
+</body>
+
+</html>

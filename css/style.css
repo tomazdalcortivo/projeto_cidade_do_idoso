@@ -54,3 +54,12 @@ input {
     color: orange;
     font-size: 28px;
 }
+
+#historia {
+    background-color: #f0f0f0;
+    padding: 15px;
+    border-radius: 10px;
+    line-height: 1.6;
+    font-size: 25px;    
+    text-align: justify;  
+}
