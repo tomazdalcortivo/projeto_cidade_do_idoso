@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Puzzle de Palavras</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <h1>🧩 Desembaralhe a Palavra</h1>
+    <p style="font-size:28px;">As letras estão embaralhadas, tente formar a palavra correta!</p>
+
+    <div id="scrambled" style="font-size:28px;"></div>
+    <input type="text" id="answer" placeholder="Digite a palavra...">
+    <button onclick="checkWord()">Verificar</button>
+
+    <p id="result"></p>
+    <br>
+    <button onclick="location.href='../index.html'">Voltar ao Menu</button>
+
+    <script>
+        const words = [
+            "teclado", "caneta", "computador", "digitar", "bola", "carro",
+            "cidade", "programar", "internet", "jogo", "puzzle",
+            "palavra", "escrever", "letra", "texto", "frase"
+        ];
+        let currentWord = words[Math.floor(Math.random() * words.length)];
+
+        function shuffle(word) {
+            return word.split("").sort(() => Math.random() - 0.5).join("");
+        }
+
+        document.getElementById("scrambled").innerText = shuffle(currentWord);
+
+        function checkWord() {
+            const input = document.getElementById("answer").value.toLowerCase();
+            if (input === currentWord) {
+                document.getElementById("result").className = "success";
+                document.getElementById("result").innerText = "Correto! Era " + currentWord;
+            } else {
+                document.getElementById("result").className = "error";
+                document.getElementById("result").innerText = "Tente novamente!";
+            }
+        }
+    </script>
+</body>
+
+</html>
