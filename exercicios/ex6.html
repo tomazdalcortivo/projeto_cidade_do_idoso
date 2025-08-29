@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Exercício de Digitação</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #fafafa;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 36px;
+      color: #333;
+    }
+
+    #frase {
+      font-size: 28px;
+      color: #4CAF50;
+      margin: 20px 0;
+    }
+
+    input {
+      font-size: 24px;
+      padding: 10px;
+      width: 80%;
+      max-width: 600px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: #6C63FF;
+      color: white;
+      font-size: 24px;
+      padding: 15px 30px;
+      margin: 10px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5A54D1;
+    }
+
+    #resultado {
+      font-size: 28px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Exercício de Digitação</h1>
+  <p>Digite a frase corretamente:</p>
+  <div id="frase"></div>
+  <input type="text" id="inputTexto" placeholder="Comece a digitar...">
+  <br>
+  <button onclick="verificar()">Verificar</button>
+  <p id="resultado"></p>
+  <br><button onclick="location.href='menu.html'">Voltar ao Menu</button>
+
+  <script>
+    const frases = [
+      "O rápido lobo marrom pula sobre o cão preguiçoso.",
+      "A programação é divertida quando se aprende passo a passo.",
+      "Nunca é tarde para aprender algo novo.",
+      "A prática leva à perfeição em tudo que fazemos.",
+      "Digitar rápido exige concentração e paciência."
+    ];
+
+    const fraseEl = document.getElementById('frase');
+    const inputEl = document.getElementById('inputTexto');
+    const resultadoEl = document.getElementById('resultado');
+
+    // seleciona frase aleatória
+    let fraseAtual = frases[Math.floor(Math.random() * frases.length)];
+    fraseEl.textContent = fraseAtual;
+
+    function verificar() {
+      const digitado = inputEl.value.trim();
+      if (digitado === fraseAtual) {
+        resultadoEl.textContent = "✅ Correto! Excelente digitação!";
+        resultadoEl.style.color = "green";
+        // seleciona nova frase
+        fraseAtual = frases[Math.floor(Math.random() * frases.length)];
+        fraseEl.textContent = fraseAtual;
+        inputEl.value = "";
+        inputEl.focus();
+      } else {
+        resultadoEl.textContent = "❌ Tente novamente...";
+        resultadoEl.style.color = "red";
+      }
+    }
+  </script>
+</body>
+
+</html>
