@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Jogo de Tricô</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .pattern-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .color-box {
+            width: 80px;
+            height: 80px;
+            margin: 0 5px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .pattern-button {
+            width: 80px;
+            height: 80px;
+            margin: 5px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .correct-answer {
+            color: green;
+            font-size: 28px;
+        }
+        .wrong-answer {
+            color: red;
+            font-size: 28px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Jogo de Tricô</h1>
+    <div class="container">
+        <p style="font-size:28px;">Observe a sequência de "pontos" e recrie-a:</p>
+        <div id="pattern-display" class="pattern-container"></div>
+        <div id="user-input" class="pattern-container"></div>
+        
+        <p id="result" style="font-size:28px;"></p>
+        
+        <div class="buttons-container" id="color-buttons"></div>
+        
+        <button onclick="newRound()">Nova Rodada</button>
+        <br>
+        <button onclick="location.href='menu.html'">Voltar</button>
+    </div>
+
+    <script>
+        const colors = ['#FF0000', '#0000FF', '#32CD32', '#FFD700', '#8A2BE2'];
+        let currentPattern = [];
+        let userInput = [];
+
+        const patternDisplay = document.getElementById('pattern-display');
+        const userInputDisplay = document.getElementById('user-input');
+        const resultEl = document.getElementById('result');
+        const buttonsContainer = document.getElementById('color-buttons');
+
+        function createButtons() {
+            buttonsContainer.innerHTML = '';
+            colors.forEach(color => {
+                const button = document.createElement('button');
+                button.className = 'pattern-button';
+                button.style.backgroundColor = color;
+                button.addEventListener('click', () => handleInput(color));
+                buttonsContainer.appendChild(button);
+            });
+        }
+
+        function newRound() {
+            currentPattern = [];
+            userInput = [];
+            patternDisplay.innerHTML = '';
+            userInputDisplay.innerHTML = '';
+            resultEl.textContent = '';
+
+            const patternLength = 4;
+            for (let i = 0; i < patternLength; i++) {
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                currentPattern.push(randomColor);
+
+                const box = document.createElement('div');
+                box.className = 'color-box';
+                box.style.backgroundColor = randomColor;
+                patternDisplay.appendChild(box);
+            }
+
+            setTimeout(() => {
+                patternDisplay.innerHTML = '';
+            }, 2000);
+        }
+
+        function handleInput(color) {
+            userInput.push(color);
+            const box = document.createElement('div');
+            box.className = 'color-box';
+            box.style.backgroundColor = color;
+            userInputDisplay.appendChild(box);
+
+            if (userInput.length === currentPattern.length) {
+                checkPattern();
+            }
+        }
+
+        function checkPattern() {
+            if (JSON.stringify(currentPattern) === JSON.stringify(userInput)) {
+                resultEl.textContent = 'Parabéns, você acertou o padrão!';
+                resultEl.className = 'correct-answer';
+            } else {
+                resultEl.textContent = 'Padrão incorreto. Tente novamente.';
+                resultEl.className = 'wrong-answer';
+            }
+            userInput = [];
+            setTimeout(() => {
+                userInputDisplay.innerHTML = '';
+            }, 1000);
+        }
+        
+        createButtons();
+        newRound();
+    </script>
+</body>
+
+</html>
