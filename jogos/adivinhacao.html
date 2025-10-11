@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Adivinhe o Número</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <h1>Adivinhe o Número</h1>
+    <div class="container">
+        <p style="font-size:28px;">Estou pensando em um número entre 1 e 100.</p>
+        <input type="number" id="guessInput" placeholder="Seu palpite...">
+        <button onclick="checkGuess()">Adivinhar</button>
+        <p id="result"></p>
+        <br>
+        <button onclick="newGame()">Novo Jogo</button>
+        <br>
+        <button onclick="location.href='menu.html'">Voltar</button>
+    </div>
+
+    <script>
+        let secretNumber = Math.floor(Math.random() * 100) + 1;
+        const guessInput = document.getElementById('guessInput');
+        const resultEl = document.getElementById('result');
+        let attempts = 0;
+
+        function checkGuess() {
+            const userGuess = parseInt(guessInput.value);
+            attempts++;
+
+            if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+                resultEl.textContent = 'Por favor, digite um número válido entre 1 e 100.';
+                resultEl.style.color = 'orange';
+            } else if (userGuess === secretNumber) {
+                resultEl.textContent = `Parabéns! Você acertou em ${attempts} tentativas!`;
+                resultEl.style.color = 'green';
+                guessInput.disabled = true;
+            } else if (userGuess < secretNumber) {
+                resultEl.textContent = 'Muito baixo. Tente um número maior.';
+                resultEl.style.color = 'red';
+            } else {
+                resultEl.textContent = 'Muito alto. Tente um número menor.';
+                resultEl.style.color = 'red';
+            }
+        }
+
+        function newGame() {
+            secretNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            resultEl.textContent = '';
+            guessInput.value = '';
+            guessInput.disabled = false;
+            guessInput.focus();
+        }
+        
+        window.onload = newGame;
+    </script>
+</body>
+
+</html>
