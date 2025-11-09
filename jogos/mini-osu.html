@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Clique no Alvo (Mini-osu!)</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* Estilos do Jogo */
+        #game-area {
+            position: relative;
+            width: 800px;
+            height: 500px;
+            margin: 20px auto;
+            border: 3px solid #6C63FF;
+            overflow: hidden;
+            background-color: #eee;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .hit-circle {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(255, 0, 0, 0.8);
+            border: 4px solid white;
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+            /* Efeito de clique */
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            /* Brilho */
+        }
+
+        .hit-circle:active {
+            transform: scale(0.9);
+        }
+
+        .miss {
+            color: red;
+            font-size: 32px;
+            position: absolute;
+            animation: fadeOut 1s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        .score-change {
+            color: green;
+            font-size: 32px;
+            position: absolute;
+            animation: fadeOut 0.5s forwards;
+            pointer-events: none;
+        }
+
+        .status-message {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Clique no Alvo (Mini-osu!)</h1>
+    <div class="container">
+        <p style="font-size:24px;">Clique nos círculos na ordem correta antes que desapareçam!
+            <br>Sua coordenação e reflexos em teste!</p>
+
+        <p id="score" class="status-message">Pontuação: 0</p>
+        <p id="combo" class="status-message">Combo: 0</p>
+        <p id="game-status" class="status-message"></p>
+
+        <div id="game-area">
+            </div>
+
+        <button onclick="newGame()">Iniciar Jogo</button>
+        <br>
+        <button onclick="location.href='menu.html'">Voltar</button>
+    </div>
+
+    <script>
+        // Variáveis de Jogo
+        const gameArea = document.getElementById('game-area');
+        const scoreEl = document.getElementById('score');
+        const comboEl = document.getElementById('combo');
+        const statusEl = document.getElementById('game-status');
+
+        let score = 0;
+        let combo = 0;
+        let nextNumber = 1;
+        let gameInterval;
+        let circleTimeout = 1500; // Tempo em ms antes do círculo desaparecer
+        let creationInterval = 1000; // Intervalo de criação de novos círculos
+
+        const maxCircles = 5; // Número máximo de círculos ativos
+
+        // Função para criar um novo alvo (Hit Circle)
+        function createHitCircle(number) {
+            if (number > 10) return; // Limita o número de círculos por rodada
+
+            const div = document.createElement('div');
+            div.className = 'hit-circle';
+            div.textContent = number;
+            div.dataset.number = number;
+
+            // Posição aleatória na área de jogo (garantindo que o círculo caiba)
+            const areaWidth = gameArea.clientWidth - 80;
+            const areaHeight = gameArea.clientHeight - 80;
+            div.style.left = Math.floor(Math.random() * areaWidth) + 'px';
+            div.style.top = Math.floor(Math.random() * areaHeight) + 'px';
+
+            gameArea.appendChild(div);
+
+            // Adiciona o evento de clique
+            div.addEventListener('click', () => {
+                handleHit(div, number);
+            });
+
+            // Configura o timer para remover o círculo (miss)
+            const timer = setTimeout(() => {
+                handleMiss(div);
+            }, circleTimeout);
+
+            div.dataset.timer = timer; // Armazena o ID do timer
+        }
+
+        // Lidar com o acerto (hit)
+        function handleHit(circle, number) {
+            if (number === nextNumber) {
+                // Acerto na ordem correta
+                clearTimeout(circle.dataset.timer); // Cancela o desaparecimento
+                gameArea.removeChild(circle);
+
+                // Atualiza pontuação e combo
+                const points = 10 * combo;
+                score += points;
+                combo++;
+                scoreEl.textContent = `Pontuação: ${score}`;
+                comboEl.textContent = `Combo: ${combo}`;
+                
+                showFeedback(circle.style.left, circle.style.top, `+${points} (${combo}x)`, 'score-change');
+
+                // Prepara para o próximo número
+                nextNumber++;
+            } else {
+                // Acerto fora de ordem (não deve acontecer com a lógica do osu!)
+                // Nesta simulação, apenas o clique na ordem correta é aceito.
+                // Se quiser permitir cliques fora de ordem, mude a lógica.
+            }
+
+            // Se for o último círculo da rodada, inicie a próxima
+            if (nextNumber > 10) {
+                endGame("Vitória! Você completou a rodada!");
+            }
+        }
+
+        // Lidar com o erro (miss) - círculo desapareceu
+        function handleMiss(circle) {
+            if (!gameArea.contains(circle)) return; // Evita erro se já foi removido
+
+            gameArea.removeChild(circle);
+            
+            showFeedback(circle.style.left, circle.style.top, 'MISS', 'miss');
+
+            // Reseta o combo
+            combo = 0;
+            comboEl.textContent = `Combo: ${combo}`;
+
+            // Se errar o primeiro número, reinicia a rodada
+            if (parseInt(circle.dataset.number) === nextNumber) {
+                endGame("Fim de Jogo! Você perdeu o alvo correto.");
+            }
+        }
+        
+        // Exibir feedback (MISS ou Pontuação)
+        function showFeedback(x, y, text, className) {
+            const fb = document.createElement('div');
+            fb.textContent = text;
+            fb.className = className;
+            fb.style.left = x;
+            fb.style.top = y;
+            gameArea.appendChild(fb);
+            setTimeout(() => {
+                if (gameArea.contains(fb)) gameArea.removeChild(fb);
+            }, 1000);
+        }
+
+        // Lógica para criar novos círculos no intervalo
+        function gameLoop() {
+            if (nextNumber <= 10) {
+                const activeCircles = gameArea.querySelectorAll('.hit-circle').length;
+                if (activeCircles < maxCircles) {
+                    createHitCircle(nextNumber + activeCircles); // Cria o próximo número
+                }
+            }
+        }
+        
+        // Iniciar novo jogo
+        function newGame() {
+            endGame(''); // Limpa jogo anterior
+            
+            score = 0;
+            combo = 0;
+            nextNumber = 1;
+            scoreEl.textContent = `Pontuação: ${score}`;
+            comboEl.textContent = `Combo: ${combo}`;
+            
+            // Cria o primeiro círculo e inicia o loop
+            createHitCircle(nextNumber);
+            gameInterval = setInterval(gameLoop, creationInterval);
+            statusEl.textContent = "Jogo em andamento...";
+        }
+
+        // Encerrar o jogo
+        function endGame(message) {
+            clearInterval(gameInterval); // Para a criação de novos alvos
+            
+            // Limpa todos os timers e remove os círculos restantes
+            gameArea.querySelectorAll('.hit-circle').forEach(circle => {
+                clearTimeout(circle.dataset.timer);
+                gameArea.removeChild(circle);
+            });
+            
+            if (message) {
+                statusEl.textContent = message;
+                statusEl.style.color = message.includes("Fim") ? 'red' : 'green';
+            } else {
+                 statusEl.textContent = "";
+            }
+        }
+
+        // Inicia o jogo ao carregar a página
+        window.onload = newGame;
+    </script>
+</body>
+
+</html>

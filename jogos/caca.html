@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Caça-Palavras</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style.css"> 
     <style>
         #grid {
             display: grid;
@@ -40,51 +40,84 @@
 
 <body>
     <h1>Caça-Palavras</h1>
-    <p style="font-size:24px;">Encontre: casa, amor, vida, fé, paz</p>
+    <p style="font-size:24px;">Encontre: casa, amor, vida, lago, paz</p>
+    
     <div id="grid"></div>
-    <p id="status" style="font-size:28px;"></p><br><button onclick="location.href='menu.html'">Voltar</button>
+    
+    <p id="status" style="font-size:28px; font-weight: bold; min-height: 30px;"></p><br>
+    
+    <button onclick="location.href='menu.html'">Voltar</button>
+    
     <script>
-        const words = ['casa', 'amor', 'vida', 'fé', 'paz'];
+        const words = ['casa', 'amor', 'vida', 'lago', 'paz'];
         const letters = [
             ['C', 'A', 'S', 'A', 'X', 'O'],
             ['B', 'A', 'M', 'O', 'R', 'Q'],
             ['V', 'I', 'D', 'A', 'L', 'M'],
             ['P', 'A', 'Z', 'T', 'E', 'F'],
-            ['F', 'E', 'X', 'Y', 'Z', 'U'],
-            ['R', 'S', 'G', 'H', 'J', 'K']];
+            ['L', 'A', 'G', 'O', 'Z', 'U'],
+            ['Q', 'A', 'U', 'S', 'J', 'K']
+        ];
+
+
         const grid = document.getElementById('grid');
+        const statusDisplay = document.getElementById('status');
         let selectedCells = [];
+
+        let foundWords = []; 
+
         letters.forEach((row, i) => {
             row.forEach((letter, j) => {
                 const div = document.createElement('div');
                 div.className = 'cell';
                 div.textContent = letter;
-                div.dataset.pos = i + '-' + j;
+                div.dataset.pos = i + '-' + j; 
+                
                 div.addEventListener('click', () => {
                     if (div.classList.contains('found')) return;
+
                     if (div.classList.contains('selected')) {
                         div.classList.remove('selected');
                         selectedCells = selectedCells.filter(c => c !== div);
                     } else {
                         div.classList.add('selected');
                         selectedCells.push(div);
-                    } checkWord();
+                    } 
+                    
+                    checkWord();
                 });
                 grid.appendChild(div);
             });
         });
+
         function checkWord() {
-            const current = selectedCells.map(c => c.textContent).join('').toLowerCase();
-            if (words.includes(current)) {
+            const currentWord = selectedCells.map(c => c.textContent).join('').toLowerCase();
+            
+            if (words.includes(currentWord)) {
+                
+                if (foundWords.includes(currentWord)) {
+                    selectedCells.forEach(c => c.classList.remove('selected'));
+                    selectedCells = [];
+                    statusDisplay.textContent = `A palavra "${currentWord.toUpperCase()}" já foi encontrada.`;
+                    return; 
+                }
                 selectedCells.forEach(c => {
                     c.classList.add('found');
                     c.classList.remove('selected');
                 });
-                selectedCells = [];
-                if (document.querySelectorAll('.found').length >= 20) {
-                    document.getElementById('status').textContent = 'Parabéns! Encontrou todas!';
+                
+                foundWords.push(currentWord); 
 
+                selectedCells = [];
+                statusDisplay.textContent = `Parabéns! Você encontrou: ${currentWord.toUpperCase()}`;
+                
+                if (foundWords.length === words.length) { 
+                    statusDisplay.textContent = '🎉 Parabéns! Você completou todas as palavras!';
                 }
+            } else if (currentWord.length > 1) {
+                statusDisplay.textContent = `"${currentWord.toUpperCase()}" não é uma palavra válida ainda.`;
+            } else {
+                statusDisplay.textContent = '';
             }
         }
     </script>
