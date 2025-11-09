@@ -11,27 +11,49 @@ h1,h2 {
     font-size: 36px;
 }
 
+/* Estilo padrao para botoes de exercícios e jogos */
 button {
     background-color: #6C63FF;
     color: white;
-    font-size: 28px;
-    padding: 20px 40px;
-    margin: 20px;
+    font-size: 24px; /* AUMENTADO para 24px para melhor visualização */
+    padding: 15px 30px;
+    margin: 0 10px;
     border: none;
     border-radius: 15px;
     cursor: pointer;
-    display: inline-block;
-    width: 80%;
-    max-width: 400px;
-}
-
-button:hover {
-    background-color: #5A54D1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 350px;
+    height: 80px;
 }
 
 .container {
     max-width: 900px;
     margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 20px; 
+}
+
+/* Estilo para os botões da página principal (index.html) */
+.main-menu-button {
+    width: 400px;
+    height: 100px;
+    font-size: 28px;
+    margin: 20px;
+}
+
+/* Garante que o botão 'Voltar ao Menu Principal' use a largura total no menu de exercícios/jogos */
+.container > button:last-child {
+    width: 80%;
+    max-width: 400px;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #5A54D1;
 }
 
 textarea,input {
