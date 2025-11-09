@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Exercício de Digitação 10</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <h1>Exercício 10: Defina e Digite a Frase</h1>
+    <div class="container">
+
+        <p style="font-size:28px; font-weight: bold;">1. Professor/Monitor: Digite a frase aqui:</p>
+        <input type="text" id="teacherInput" placeholder="Digite a frase para o aluno...">
+        <button onclick="setPhrase()" id="setPhraseBtn">Definir Frase</button>
+        
+        <br><br>
+
+        <p style="font-size:28px; font-weight: bold;">2. Aluno: Redigite a frase abaixo:</p>
+        <input type="text" id="userInput" placeholder="Digite aqui..." disabled>
+        <button onclick="checkPhrase()" id="checkBtn" disabled>Verificar</button>
+        
+        <p id="result"></p>
+
+        <br><button onclick="location.href='menu.html'">Voltar ao Menu</button>
+    </div>
+
+    <script>
+        const teacherInput = document.getElementById('teacherInput');
+        const userInput = document.getElementById('userInput');
+        const resultEl = document.getElementById('result');
+        const setPhraseBtn = document.getElementById('setPhraseBtn');
+        const checkBtn = document.getElementById('checkBtn');
+
+        function setPhrase() {
+            const phrase = teacherInput.value.trim();
+
+            if (phrase === "") {
+                resultEl.textContent = "Por favor, digite uma frase primeiro.";
+                resultEl.className = "error";
+                return;
+            }
+
+            // Congela o campo do professor
+            teacherInput.disabled = true;
+            teacherInput.style.backgroundColor = '#e0e0e0'; 
+            setPhraseBtn.disabled = true;
+
+            // Libera o campo do aluno
+            userInput.disabled = false;
+            userInput.focus();
+            userInput.value = '';
+            userInput.style.backgroundColor = 'white';
+            checkBtn.disabled = false;
+            resultEl.textContent = "Frase definida! Comece a digitar abaixo.";
+            resultEl.className = "success";
+        }
+
+        function checkPhrase() {
+            const expectedPhrase = teacherInput.value.trim();
+            const typedPhrase = userInput.value.trim();
+
+            if (typedPhrase === expectedPhrase) {
+                resultEl.textContent = "✅ Correto! Excelente digitação!";
+                resultEl.className = "success";
+                userInput.style.backgroundColor = "#c8f7c5"; 
+            } else {
+                resultEl.textContent = `❌ Incorreto. Tente novamente ou verifique se digitou exatamente igual.`;
+                resultEl.className = "error";
+                userInput.style.backgroundColor = "#fff3cd"; 
+            }
+        }
+        
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                checkPhrase();
+            }
+        });
+
+        window.onload = function() {
+            teacherInput.focus();
+        };
+
+    </script>
+</body>
+
+</html>
