@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Clique no Alvo</title>
+    <title>Clique no Alvo (Estilo Osu!)</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
         #game-area {
@@ -19,7 +19,6 @@
             cursor: none;
         }
 
-        /* Canvas para o rastro (linha) */
         #trail-canvas {
             position: absolute;
             top: 0;
@@ -30,7 +29,6 @@
             z-index: 80;
         }
 
-        /* Cursor Personalizado (Mira) */
         .custom-cursor {
             position: absolute;
             width: 30px;
@@ -146,20 +144,21 @@
         .buttons-wrapper {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             margin-top: 20px;
         }
 
         button {
-            width: 250px;
+            min-width: 200px;
             height: 60px;
             font-size: 20px;
+            padding: 10px;
         }
     </style>
 </head>
 
 <body>
-    <h1>Clique no Alvo (Ritmo Suave)</h1>
+    <h1>Clique no Alvo</h1>
     <div class="container">
         <p style="font-size:22px; max-width: 800px; margin: 0 auto;">
             Mova o mouse desenhando uma linha e clique nos números em ordem (1, 2, 3...)
@@ -175,23 +174,22 @@
 
         <div id="game-area">
             <canvas id="trail-canvas" width="800" height="500"></canvas>
-
             <div id="cursor" class="custom-cursor" style="display:none;"></div>
         </div>
 
         <div class="buttons-wrapper">
-            <button onclick="newGame()">Iniciar Jogo</button>
+            <button onclick="newGame('medium')">Iniciar (Médio - Lento)</button>
+            <button onclick="newGame('hard')">Iniciar (Difícil - Rápido)</button>
             <button onclick="location.href='menu.html'">Voltar</button>
         </div>
     </div>
 
     <script>
-        // --- Configurações de Velocidade e Acessibilidade ---
         const CIRCLE_SIZE = 100;
-        const APPROACH_TIME = 3000;
-        const SPAWN_RATE = 3000;
         const MAX_CIRCLES_ON_SCREEN = 2;
-        // ----------------------------------------------------
+
+        let currentApproachTime = 3000;
+        let currentSpawnRate = 3000;
 
         const gameArea = document.getElementById('game-area');
         const scoreEl = document.getElementById('score');
@@ -199,10 +197,9 @@
         const statusEl = document.getElementById('game-status');
         const cursorEl = document.getElementById('cursor');
 
-        // Configuração do Rastro (Canvas)
         const canvas = document.getElementById('trail-canvas');
         const ctx = canvas.getContext('2d');
-        let trailPoints = []; // Armazena os pontos do rastro
+        let trailPoints = [];
 
         let score = 0;
         let combo = 0;
@@ -215,13 +212,15 @@
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
-            // Atualiza posição do cursor
             cursorEl.style.left = x + 'px';
             cursorEl.style.top = y + 'px';
             cursorEl.style.display = 'block';
 
-            // Adiciona ponto ao rastro se estiver jogando ou apenas movendo
-            trailPoints.push({ x: x, y: y, time: Date.now() });
+            trailPoints.push({
+                x: x,
+                y: y,
+                time: Date.now()
+            });
         });
 
         gameArea.addEventListener('mouseleave', () => {
@@ -229,9 +228,7 @@
         });
 
         function renderTrail() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas
-
-            // Remove pontos muito antigos (mais de 0.5 segundos)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             const now = Date.now();
             trailPoints = trailPoints.filter(p => now - p.time < 500);
 
@@ -240,29 +237,20 @@
                 return;
             }
 
-            // Desenha a linha
             ctx.beginPath();
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.lineWidth = 5;
-
-            // Efeito de gradiente ou cor sólida
             ctx.strokeStyle = 'rgba(108, 99, 255, 0.6)';
-
             ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
 
-            // Cria uma curva suave entre os pontos
             for (let i = 1; i < trailPoints.length; i++) {
-                // Desenha linha reta simples entre pontos para performance
                 ctx.lineTo(trailPoints[i].x, trailPoints[i].y);
             }
 
             ctx.stroke();
-
             requestAnimationFrame(renderTrail);
         }
-
-        // Inicia a renderização do rastro
         requestAnimationFrame(renderTrail);
 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -315,7 +303,7 @@
 
             const ring = document.createElement('div');
             ring.className = 'approach-circle';
-            ring.style.animation = `shrink ${APPROACH_TIME}ms linear forwards`;
+            ring.style.animation = `shrink ${currentApproachTime}ms linear forwards`;
 
             container.appendChild(ring);
             container.appendChild(circle);
@@ -337,7 +325,7 @@
                 if (!clicked && isPlaying) {
                     handleMiss(container, number);
                 }
-            }, APPROACH_TIME);
+            }, currentApproachTime);
 
             container.dataset.timer = missTimer;
         }
@@ -380,7 +368,9 @@
             el.style.left = (parseInt(left) + CIRCLE_SIZE / 4) + 'px';
             el.style.top = top;
             gameArea.appendChild(el);
-            setTimeout(() => { if (gameArea.contains(el)) gameArea.removeChild(el); }, 1000);
+            setTimeout(() => {
+                if (gameArea.contains(el)) gameArea.removeChild(el);
+            }, 1000);
         }
 
         function updateStats() {
@@ -399,8 +389,18 @@
             }
         }
 
-        function newGame() {
-            // Remove círculos antigos, mas mantém o canvas e cursor
+        function newGame(difficulty) {
+            if (difficulty === 'medium') {
+                currentApproachTime = 6000;
+                currentSpawnRate = 6000;
+                statusEl.textContent = "Modo Médio: Bem devagar...";
+            } else {
+                currentApproachTime = 3000;
+                currentSpawnRate = 3000;
+                statusEl.textContent = "Modo Difícil: Atenção!";
+            }
+            statusEl.style.color = "#333";
+
             const hitCircles = document.querySelectorAll('.hit-circle-container');
             hitCircles.forEach(el => gameArea.removeChild(el));
             const feedbacks = document.querySelectorAll('.feedback');
@@ -413,11 +413,9 @@
             nextNumber = 1;
             updateStats();
             isPlaying = true;
-            statusEl.textContent = "Siga o rastro e clique nos números!";
-            statusEl.style.color = "#333";
 
             createHitCircle(1);
-            gameInterval = setInterval(gameLoop, SPAWN_RATE);
+            gameInterval = setInterval(gameLoop, currentSpawnRate);
         }
 
         function endGame(msg, success) {
