@@ -3,252 +3,434 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Clique no Alvo (Mini-osu!)</title>
+    <title>Clique no Alvo</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        /* Estilos do Jogo */
         #game-area {
             position: relative;
             width: 800px;
             height: 500px;
             margin: 20px auto;
-            border: 3px solid #6C63FF;
+            border: 4px solid #333;
             overflow: hidden;
-            background-color: #eee;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: none;
+        }
+
+        /* Canvas para o rastro (linha) */
+        #trail-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 80;
+        }
+
+        /* Cursor Personalizado (Mira) */
+        .custom-cursor {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #333;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .custom-cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background-color: #333;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .hit-circle-container {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .hit-circle {
-            position: absolute;
-            width: 80px;
-            height: 80px;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            background-color: rgba(255, 0, 0, 0.8);
+            background-color: #4CAF50;
             border: 4px solid white;
             color: white;
-            font-size: 36px;
+            font-size: 40px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 2;
             transition: transform 0.1s;
-            /* Efeito de clique */
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-            /* Brilho */
         }
 
         .hit-circle:active {
-            transform: scale(0.9);
+            transform: scale(0.95);
         }
 
-        .miss {
-            color: red;
-            font-size: 32px;
+        .approach-circle {
             position: absolute;
-            animation: fadeOut 1s forwards;
-            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid #666;
+            opacity: 0.8;
+            top: -4px;
+            left: -4px;
+            z-index: 1;
         }
 
-        @keyframes fadeOut {
+        @keyframes shrink {
             from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            to {
+                transform: scale(2.5);
                 opacity: 0;
-                transform: translateY(-20px);
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
             }
         }
 
-        .score-change {
-            color: green;
-            font-size: 32px;
+        .feedback {
+            font-size: 36px;
+            font-weight: bold;
             position: absolute;
-            animation: fadeOut 0.5s forwards;
             pointer-events: none;
+            animation: floatUp 1s forwards;
+            z-index: 10;
+            text-shadow: 1px 1px 2px white;
         }
 
-        .status-message {
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(1.2);
+            }
+        }
+
+        .score-panel {
+            display: flex;
+            justify-content: space-around;
             font-size: 24px;
+            margin-bottom: 10px;
             font-weight: bold;
-            margin-top: 10px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .buttons-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        button {
+            width: 250px;
+            height: 60px;
+            font-size: 20px;
         }
     </style>
 </head>
 
 <body>
-    <h1>Clique no Alvo (Mini-osu!)</h1>
+    <h1>Clique no Alvo (Ritmo Suave)</h1>
     <div class="container">
-        <p style="font-size:24px;">Clique nos círculos na ordem correta antes que desapareçam!
-            <br>Sua coordenação e reflexos em teste!</p>
+        <p style="font-size:22px; max-width: 800px; margin: 0 auto;">
+            Mova o mouse desenhando uma linha e clique nos números em ordem (1, 2, 3...)
+            quando o anel encostar no círculo.
+        </p>
 
-        <p id="score" class="status-message">Pontuação: 0</p>
-        <p id="combo" class="status-message">Combo: 0</p>
-        <p id="game-status" class="status-message"></p>
+        <div class="score-panel">
+            <span id="score">Pontuação: 0</span>
+            <span id="combo">Combo: 0</span>
+        </div>
+
+        <p id="game-status" style="font-size: 24px; height: 30px; margin-top:5px; color: #333;"></p>
 
         <div id="game-area">
-            </div>
+            <canvas id="trail-canvas" width="800" height="500"></canvas>
 
-        <button onclick="newGame()">Iniciar Jogo</button>
-        <br>
-        <button onclick="location.href='menu.html'">Voltar</button>
+            <div id="cursor" class="custom-cursor" style="display:none;"></div>
+        </div>
+
+        <div class="buttons-wrapper">
+            <button onclick="newGame()">Iniciar Jogo</button>
+            <button onclick="location.href='menu.html'">Voltar</button>
+        </div>
     </div>
 
     <script>
-        // Variáveis de Jogo
+        // --- Configurações de Velocidade e Acessibilidade ---
+        const CIRCLE_SIZE = 100;
+        const APPROACH_TIME = 3000;
+        const SPAWN_RATE = 3000;
+        const MAX_CIRCLES_ON_SCREEN = 2;
+        // ----------------------------------------------------
+
         const gameArea = document.getElementById('game-area');
         const scoreEl = document.getElementById('score');
         const comboEl = document.getElementById('combo');
         const statusEl = document.getElementById('game-status');
+        const cursorEl = document.getElementById('cursor');
+
+        // Configuração do Rastro (Canvas)
+        const canvas = document.getElementById('trail-canvas');
+        const ctx = canvas.getContext('2d');
+        let trailPoints = []; // Armazena os pontos do rastro
 
         let score = 0;
         let combo = 0;
         let nextNumber = 1;
         let gameInterval;
-        let circleTimeout = 1500; // Tempo em ms antes do círculo desaparecer
-        let creationInterval = 1000; // Intervalo de criação de novos círculos
+        let isPlaying = false;
 
-        const maxCircles = 5; // Número máximo de círculos ativos
+        gameArea.addEventListener('mousemove', (e) => {
+            const rect = gameArea.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
-        // Função para criar um novo alvo (Hit Circle)
+            // Atualiza posição do cursor
+            cursorEl.style.left = x + 'px';
+            cursorEl.style.top = y + 'px';
+            cursorEl.style.display = 'block';
+
+            // Adiciona ponto ao rastro se estiver jogando ou apenas movendo
+            trailPoints.push({ x: x, y: y, time: Date.now() });
+        });
+
+        gameArea.addEventListener('mouseleave', () => {
+            cursorEl.style.display = 'none';
+        });
+
+        function renderTrail() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas
+
+            // Remove pontos muito antigos (mais de 0.5 segundos)
+            const now = Date.now();
+            trailPoints = trailPoints.filter(p => now - p.time < 500);
+
+            if (trailPoints.length < 2) {
+                requestAnimationFrame(renderTrail);
+                return;
+            }
+
+            // Desenha a linha
+            ctx.beginPath();
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 5;
+
+            // Efeito de gradiente ou cor sólida
+            ctx.strokeStyle = 'rgba(108, 99, 255, 0.6)';
+
+            ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
+
+            // Cria uma curva suave entre os pontos
+            for (let i = 1; i < trailPoints.length; i++) {
+                // Desenha linha reta simples entre pontos para performance
+                ctx.lineTo(trailPoints[i].x, trailPoints[i].y);
+            }
+
+            ctx.stroke();
+
+            requestAnimationFrame(renderTrail);
+        }
+
+        // Inicia a renderização do rastro
+        requestAnimationFrame(renderTrail);
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'hit') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'miss') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
         function createHitCircle(number) {
-            if (number > 10) return; // Limita o número de círculos por rodada
+            if (!isPlaying) return;
 
-            const div = document.createElement('div');
-            div.className = 'hit-circle';
-            div.textContent = number;
-            div.dataset.number = number;
+            const container = document.createElement('div');
+            container.className = 'hit-circle-container';
+            container.style.width = CIRCLE_SIZE + 'px';
+            container.style.height = CIRCLE_SIZE + 'px';
 
-            // Posição aleatória na área de jogo (garantindo que o círculo caiba)
-            const areaWidth = gameArea.clientWidth - 80;
-            const areaHeight = gameArea.clientHeight - 80;
-            div.style.left = Math.floor(Math.random() * areaWidth) + 'px';
-            div.style.top = Math.floor(Math.random() * areaHeight) + 'px';
+            const maxX = gameArea.clientWidth - CIRCLE_SIZE;
+            const maxY = gameArea.clientHeight - CIRCLE_SIZE;
+            container.style.left = Math.floor(Math.random() * maxX) + 'px';
+            container.style.top = Math.floor(Math.random() * maxY) + 'px';
 
-            gameArea.appendChild(div);
+            const circle = document.createElement('div');
+            circle.className = 'hit-circle';
+            circle.textContent = number;
 
-            // Adiciona o evento de clique
-            div.addEventListener('click', () => {
-                handleHit(div, number);
+            const colors = ['#4CAF50', '#2196F3', '#FF9800', '#9C27B0'];
+            circle.style.backgroundColor = colors[(number - 1) % colors.length];
+
+            const ring = document.createElement('div');
+            ring.className = 'approach-circle';
+            ring.style.animation = `shrink ${APPROACH_TIME}ms linear forwards`;
+
+            container.appendChild(ring);
+            container.appendChild(circle);
+            gameArea.appendChild(container);
+
+            let clicked = false;
+
+            circle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                if (clicked) return;
+
+                if (number === nextNumber) {
+                    clicked = true;
+                    handleHit(container, number);
+                }
             });
 
-            // Configura o timer para remover o círculo (miss)
-            const timer = setTimeout(() => {
-                handleMiss(div);
-            }, circleTimeout);
+            const missTimer = setTimeout(() => {
+                if (!clicked && isPlaying) {
+                    handleMiss(container, number);
+                }
+            }, APPROACH_TIME);
 
-            div.dataset.timer = timer; // Armazena o ID do timer
+            container.dataset.timer = missTimer;
         }
 
-        // Lidar com o acerto (hit)
-        function handleHit(circle, number) {
+        function handleHit(element, number) {
+            clearTimeout(element.dataset.timer);
+            showFeedback(element.style.left, element.style.top, "Ótimo!", 'green');
+            playSound('hit');
+            gameArea.removeChild(element);
+            score += 10 + combo;
+            combo++;
+            nextNumber++;
+            updateStats();
+
+            if (number === 15) {
+                endGame("Parabéns! Sessão concluída com sucesso!", true);
+            }
+        }
+
+        function handleMiss(element, number) {
+            if (!gameArea.contains(element)) return;
+
             if (number === nextNumber) {
-                // Acerto na ordem correta
-                clearTimeout(circle.dataset.timer); // Cancela o desaparecimento
-                gameArea.removeChild(circle);
-
-                // Atualiza pontuação e combo
-                const points = 10 * combo;
-                score += points;
-                combo++;
-                scoreEl.textContent = `Pontuação: ${score}`;
-                comboEl.textContent = `Combo: ${combo}`;
-                
-                showFeedback(circle.style.left, circle.style.top, `+${points} (${combo}x)`, 'score-change');
-
-                // Prepara para o próximo número
+                showFeedback(element.style.left, element.style.top, "Ops...", 'orange');
+                playSound('miss');
+                combo = 0;
+                gameArea.removeChild(element);
                 nextNumber++;
             } else {
-                // Acerto fora de ordem (não deve acontecer com a lógica do osu!)
-                // Nesta simulação, apenas o clique na ordem correta é aceito.
-                // Se quiser permitir cliques fora de ordem, mude a lógica.
+                gameArea.removeChild(element);
             }
-
-            // Se for o último círculo da rodada, inicie a próxima
-            if (nextNumber > 10) {
-                endGame("Vitória! Você completou a rodada!");
-            }
+            updateStats();
         }
 
-        // Lidar com o erro (miss) - círculo desapareceu
-        function handleMiss(circle) {
-            if (!gameArea.contains(circle)) return; // Evita erro se já foi removido
+        function showFeedback(left, top, text, color) {
+            const el = document.createElement('div');
+            el.className = 'feedback';
+            el.textContent = text;
+            el.style.color = color;
+            el.style.left = (parseInt(left) + CIRCLE_SIZE / 4) + 'px';
+            el.style.top = top;
+            gameArea.appendChild(el);
+            setTimeout(() => { if (gameArea.contains(el)) gameArea.removeChild(el); }, 1000);
+        }
 
-            gameArea.removeChild(circle);
-            
-            showFeedback(circle.style.left, circle.style.top, 'MISS', 'miss');
-
-            // Reseta o combo
-            combo = 0;
+        function updateStats() {
+            scoreEl.textContent = `Pontuação: ${score}`;
             comboEl.textContent = `Combo: ${combo}`;
-
-            // Se errar o primeiro número, reinicia a rodada
-            if (parseInt(circle.dataset.number) === nextNumber) {
-                endGame("Fim de Jogo! Você perdeu o alvo correto.");
-            }
-        }
-        
-        // Exibir feedback (MISS ou Pontuação)
-        function showFeedback(x, y, text, className) {
-            const fb = document.createElement('div');
-            fb.textContent = text;
-            fb.className = className;
-            fb.style.left = x;
-            fb.style.top = y;
-            gameArea.appendChild(fb);
-            setTimeout(() => {
-                if (gameArea.contains(fb)) gameArea.removeChild(fb);
-            }, 1000);
         }
 
-        // Lógica para criar novos círculos no intervalo
         function gameLoop() {
-            if (nextNumber <= 10) {
-                const activeCircles = gameArea.querySelectorAll('.hit-circle').length;
-                if (activeCircles < maxCircles) {
-                    createHitCircle(nextNumber + activeCircles); // Cria o próximo número
-                }
+            if (!isPlaying) return;
+            const currentCircles = document.querySelectorAll('.hit-circle-container').length;
+
+            if (currentCircles < MAX_CIRCLES_ON_SCREEN && (nextNumber + currentCircles) <= 15) {
+                createHitCircle(nextNumber + currentCircles);
+            } else if (currentCircles === 0 && nextNumber > 15) {
+                endGame("Sessão Finalizada!", true);
             }
         }
-        
-        // Iniciar novo jogo
+
         function newGame() {
-            endGame(''); // Limpa jogo anterior
-            
+            // Remove círculos antigos, mas mantém o canvas e cursor
+            const hitCircles = document.querySelectorAll('.hit-circle-container');
+            hitCircles.forEach(el => gameArea.removeChild(el));
+            const feedbacks = document.querySelectorAll('.feedback');
+            feedbacks.forEach(el => gameArea.removeChild(el));
+
+            clearInterval(gameInterval);
+
             score = 0;
             combo = 0;
             nextNumber = 1;
-            scoreEl.textContent = `Pontuação: ${score}`;
-            comboEl.textContent = `Combo: ${combo}`;
-            
-            // Cria o primeiro círculo e inicia o loop
-            createHitCircle(nextNumber);
-            gameInterval = setInterval(gameLoop, creationInterval);
-            statusEl.textContent = "Jogo em andamento...";
+            updateStats();
+            isPlaying = true;
+            statusEl.textContent = "Siga o rastro e clique nos números!";
+            statusEl.style.color = "#333";
+
+            createHitCircle(1);
+            gameInterval = setInterval(gameLoop, SPAWN_RATE);
         }
 
-        // Encerrar o jogo
-        function endGame(message) {
-            clearInterval(gameInterval); // Para a criação de novos alvos
-            
-            // Limpa todos os timers e remove os círculos restantes
-            gameArea.querySelectorAll('.hit-circle').forEach(circle => {
-                clearTimeout(circle.dataset.timer);
-                gameArea.removeChild(circle);
-            });
-            
-            if (message) {
-                statusEl.textContent = message;
-                statusEl.style.color = message.includes("Fim") ? 'red' : 'green';
-            } else {
-                 statusEl.textContent = "";
-            }
-        }
+        function endGame(msg, success) {
+            isPlaying = false;
+            clearInterval(gameInterval);
 
-        // Inicia o jogo ao carregar a página
-        window.onload = newGame;
+            const hitCircles = document.querySelectorAll('.hit-circle-container');
+            hitCircles.forEach(el => gameArea.removeChild(el));
+
+            statusEl.textContent = msg;
+            statusEl.style.color = success ? "green" : "red";
+            if (success) playSound('hit');
+        }
     </script>
 </body>
 
