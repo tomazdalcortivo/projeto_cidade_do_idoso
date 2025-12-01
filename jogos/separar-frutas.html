@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Separando as Frutas</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* Área do Jogo */
+        #game-area {
+            position: relative;
+            width: 900px;
+            height: 650px; /* Aumentei um pouco a altura total */
+            margin: 20px auto;
+            border: 4px solid #8B4513;
+            background-color: #fceecb;
+            border-radius: 15px;
+            overflow: hidden;
+            user-select: none;
+            cursor: crosshair;
+        }
+
+        /* As Frutas */
+        .fruit {
+            position: absolute;
+            font-size: 55px; /* Frutas um pouco maiores também */
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.2s;
+            padding: 5px;
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .fruit.selected {
+            background-color: rgba(108, 99, 255, 0.3);
+            box-shadow: 0 0 10px #6C63FF;
+            transform: scale(1.15);
+            z-index: 100;
+        }
+
+        /* Container das Cestas (Aumentado) */
+        .baskets-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 220px; /* Altura maior para caber as cestas grandes */
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            background: rgba(255, 255, 255, 0.4);
+            border-top: 2px solid #dba674;
+            pointer-events: none; 
+            padding-bottom: 10px;
+        }
+
+        /* As Cestas (AUMENTADAS) */
+        .basket {
+            width: 250px;  /* Largura aumentada */
+            height: 160px; /* Altura aumentada */
+            border: 5px solid #5d4037;
+            border-radius: 0 0 25px 25px;
+            background-color: #8d6e63;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px; /* Texto maior */
+            color: white;
+            font-weight: bold;
+            position: relative;
+            margin-bottom: 10px;
+            pointer-events: auto; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Ícone da cesta */
+        .basket::after {
+            content: attr(data-fruit);
+            position: absolute;
+            top: -50px;
+            font-size: 60px; /* Ícone maior */
+        }
+
+        /* Caixa de Seleção */
+        #selection-box {
+            position: absolute;
+            border: 2px solid #2196F3;
+            background-color: rgba(33, 150, 243, 0.3);
+            display: none;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Feedback visual (mensagens flutuantes) */
+        .feedback-msg {
+            position: absolute;
+            font-size: 40px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1.5s forwards;
+            z-index: 2000;
+            text-shadow: 2px 2px 0px white;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-60px); }
+        }
+
+        /* Tela de Vitória (Overlay) */
+        #victory-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none; /* Escondido por padrão */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            color: white;
+            text-align: center;
+        }
+
+        #victory-screen h2 {
+            font-size: 60px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        #victory-screen p {
+            font-size: 30px;
+            margin-bottom: 40px;
+            color: #fff;
+        }
+
+        .buttons-wrapper {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Separando as Frutas</h1>
+    <div class="container">
+        <p style="font-size: 22px; max-width: 900px; margin: 0 auto;">
+            1. Clique e arraste na mesa para <b>selecionar</b> as frutas iguais.<br>
+            2. Arraste o grupo para a cesta correta!
+        </p>
+
+        <div id="game-area">
+            <div id="selection-box"></div>
+            
+            <div class="baskets-container">
+                <div class="basket" id="basket-apple" data-type="apple" data-fruit="🍎">Maçãs</div>
+                <div class="basket" id="basket-banana" data-type="banana" data-fruit="🍌">Bananas</div>
+                <div class="basket" id="basket-grape" data-type="grape" data-fruit="🍇">Uvas</div>
+            </div>
+
+            <div id="victory-screen">
+                <h2>🎉 Parabéns! 🎉</h2>
+                <p>Você organizou todas as frutas!</p>
+                <div style="display: flex; gap: 20px;">
+                    <button onclick="spawnFruits()" style="width: 250px;">Jogar Novamente</button>
+                    <button onclick="location.href='menu.html'" style="width: 250px;">Voltar ao Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="buttons-wrapper">
+            <button onclick="spawnFruits()">Reiniciar Mesa</button>
+            <button onclick="location.href='menu.html'">Voltar</button>
+        </div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('game-area');
+        const selectionBox = document.getElementById('selection-box');
+        const victoryScreen = document.getElementById('victory-screen');
+
+        const fruitTypes = [
+            { type: 'apple', icon: '🍎' },
+            { type: 'banana', icon: '🍌' },
+            { type: 'grape', icon: '🍇' }
+        ];
+
+        let isSelecting = false;
+        let startX, startY;
+        
+        let isDragging = false;
+        let draggedElements = [];
+        
+        function spawnFruits() {
+            // Remove frutas antigas e esconde tela de vitória
+            document.querySelectorAll('.fruit').forEach(f => f.remove());
+            victoryScreen.style.display = 'none';
+
+            // Cria 12 frutas (4 de cada para garantir balanceamento ou aleatório)
+            for (let i = 0; i < 15; i++) {
+                createFruit();
+            }
+        }
+
+        function createFruit() {
+            const fruitData = fruitTypes[Math.floor(Math.random() * fruitTypes.length)];
+            const div = document.createElement('div');
+            div.className = 'fruit';
+            div.textContent = fruitData.icon;
+            div.dataset.type = fruitData.type;
+
+            // Área segura para spawnar (evitando as cestas grandes embaixo)
+            const maxX = gameArea.clientWidth - 70;
+            const maxY = gameArea.clientHeight - 280; // Espaço reservado para as cestas maiores
+            
+            div.style.left = (Math.random() * maxX) + 'px';
+            div.style.top = (Math.random() * maxY) + 'px';
+
+            gameArea.appendChild(div);
+        }
+
+        // --- Eventos do Mouse ---
+        gameArea.addEventListener('mousedown', (e) => {
+            if (victoryScreen.style.display === 'flex') return; // Bloqueia se venceu
+
+            if (e.target.classList.contains('fruit')) {
+                handleFruitMouseDown(e);
+            } else {
+                handleSelectionStart(e);
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isSelecting) {
+                updateSelectionBox(e);
+            } else if (isDragging) {
+                dragFruits(e);
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (isSelecting) {
+                finishSelection();
+            } else if (isDragging) {
+                dropFruits(e);
+            }
+        });
+
+        // --- Seleção ---
+        function handleSelectionStart(e) {
+            deselectAll();
+            isSelecting = true;
+            const rect = gameArea.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+
+            selectionBox.style.left = startX + 'px';
+            selectionBox.style.top = startY + 'px';
+            selectionBox.style.width = '0px';
+            selectionBox.style.height = '0px';
+            selectionBox.style.display = 'block';
+        }
+
+        function updateSelectionBox(e) {
+            const rect = gameArea.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+
+            const width = Math.abs(currentX - startX);
+            const height = Math.abs(currentY - startY);
+            const left = Math.min(currentX, startX);
+            const top = Math.min(currentY, startY);
+
+            selectionBox.style.width = width + 'px';
+            selectionBox.style.height = height + 'px';
+            selectionBox.style.left = left + 'px';
+            selectionBox.style.top = top + 'px';
+
+            selectFruitsInBox(left, top, width, height);
+        }
+
+        function selectFruitsInBox(boxX, boxY, boxW, boxH) {
+            const fruits = document.querySelectorAll('.fruit');
+            fruits.forEach(fruit => {
+                const fLeft = fruit.offsetLeft;
+                const fTop = fruit.offsetTop;
+                const fW = fruit.offsetWidth;
+                const fH = fruit.offsetHeight;
+
+                if (boxX < fLeft + fW && boxX + boxW > fLeft &&
+                    boxY < fTop + fH && boxY + boxH > fTop) {
+                    fruit.classList.add('selected');
+                } else {
+                    fruit.classList.remove('selected');
+                }
+            });
+        }
+
+        function finishSelection() {
+            isSelecting = false;
+            selectionBox.style.display = 'none';
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.fruit.selected').forEach(f => f.classList.remove('selected'));
+        }
+
+        // --- Arraste e Soltura ---
+        function handleFruitMouseDown(e) {
+            const fruit = e.target;
+            if (!fruit.classList.contains('selected')) {
+                deselectAll();
+                fruit.classList.add('selected');
+            }
+            isDragging = true;
+            draggedElements = document.querySelectorAll('.fruit.selected');
+            startX = e.clientX;
+            startY = e.clientY;
+        }
+
+        function dragFruits(e) {
+            e.preventDefault(); 
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+
+            draggedElements.forEach(fruit => {
+                fruit.style.left = (fruit.offsetLeft + deltaX) + 'px';
+                fruit.style.top = (fruit.offsetTop + deltaY) + 'px';
+            });
+            startX = e.clientX;
+            startY = e.clientY;
+        }
+
+        function dropFruits(e) {
+            isDragging = false;
+            
+            // Lógica de colisão com cestas
+            const baskets = document.querySelectorAll('.basket');
+            let droppedInBasket = null;
+
+            baskets.forEach(basket => {
+                // Checa se o mouse está dentro da área da cesta
+                // Usando e.target ou geometria do mouse
+                const rect = basket.getBoundingClientRect();
+                if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                    e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                    droppedInBasket = basket;
+                }
+            });
+
+            if (droppedInBasket) {
+                checkDelivery(droppedInBasket);
+            }
+        }
+
+        function checkDelivery(basket) {
+            const targetType = basket.dataset.type;
+            let allCorrect = true;
+            let count = 0;
+
+            draggedElements.forEach(fruit => {
+                if (fruit.dataset.type !== targetType) {
+                    allCorrect = false;
+                }
+                count++;
+            });
+
+            if (allCorrect && count > 0) {
+                showFeedback(basket, "👍 Correto!", "green");
+                draggedElements.forEach(fruit => {
+                    fruit.style.transform = "scale(0)";
+                    setTimeout(() => fruit.remove(), 200);
+                });
+                
+                // Verifica Vitória após um breve delay para a animação terminar
+                setTimeout(checkWinCondition, 300);
+                
+            } else {
+                showFeedback(basket, "❌ Cesta Errada!", "red");
+            }
+            
+            deselectAll();
+        }
+
+        function checkWinCondition() {
+            const remainingFruits = document.querySelectorAll('.fruit');
+            if (remainingFruits.length === 0) {
+                victoryScreen.style.display = 'flex';
+            }
+        }
+
+        function showFeedback(element, text, color) {
+            const msg = document.createElement('div');
+            msg.className = 'feedback-msg';
+            msg.textContent = text;
+            msg.style.color = color;
+            // Centraliza mensagem na cesta
+            const rect = element.getBoundingClientRect();
+            const gameRect = gameArea.getBoundingClientRect();
+            
+            msg.style.left = (element.offsetLeft + 20) + 'px';
+            msg.style.top = (gameArea.clientHeight - 250) + 'px';
+
+            gameArea.appendChild(msg);
+            setTimeout(() => msg.remove(), 1500);
+        }
+
+        window.onload = spawnFruits;
+    </script>
+</body>
+
+</html>

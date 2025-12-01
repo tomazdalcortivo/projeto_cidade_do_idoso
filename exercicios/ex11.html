@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Exercício de Digitação 11</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        textarea {
+            resize: none;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Exercício 11: Textos e Poemas</h1>
+    <div class="container">
+
+        <p style="font-size:28px; font-weight: bold;">1. Professor/Monitor: Digite o texto ou poema:</p>
+        <textarea id="teacherInput" rows="6" placeholder="Digite o texto longo ou poema aqui..."></textarea>
+        <button onclick="setText()" id="setTextBtn">Definir Texto</button>
+
+        <br><br>
+
+        <p style="font-size:28px; font-weight: bold;">2. Aluno: Redigite o texto abaixo:</p>
+        <textarea id="userInput" rows="6" placeholder="O aluno digitará aqui..." disabled></textarea>
+        <button onclick="checkText()" id="checkBtn" disabled>Verificar Texto</button>
+
+        <p id="result"></p>
+
+        <br><button onclick="location.href='menu.html'">Voltar ao Menu</button>
+    </div>
+
+    <script>
+        const teacherInput = document.getElementById('teacherInput');
+        const userInput = document.getElementById('userInput');
+        const resultEl = document.getElementById('result');
+        const setTextBtn = document.getElementById('setTextBtn');
+        const checkBtn = document.getElementById('checkBtn');
+
+        function setText() {
+            const text = teacherInput.value.trim();
+
+            if (text === "") {
+                resultEl.textContent = "Por favor, digite um texto primeiro.";
+                resultEl.className = "error";
+                return;
+            }
+
+            teacherInput.disabled = true;
+            teacherInput.style.backgroundColor = '#e0e0e0';
+            teacherInput.style.color = '#555';
+            setTextBtn.disabled = true;
+
+            userInput.disabled = false;
+            userInput.focus();
+            userInput.value = '';
+            userInput.style.backgroundColor = 'white';
+            checkBtn.disabled = false;
+
+            resultEl.textContent = "Texto definido! Copie o texto acima (respeite as linhas).";
+            resultEl.className = "success";
+        }
+
+        function checkText() {
+            const expectedText = teacherInput.value.trim();
+            const typedText = userInput.value.trim();
+
+            if (typedText === expectedText) {
+                resultEl.textContent = "✅ Parabéns! O texto está idêntico!";
+                resultEl.className = "success";
+                userInput.style.backgroundColor = "#c8f7c5";
+            } else {
+                resultEl.textContent = "❌ Há diferenças. Verifique a pontuação e as quebras de linha.";
+                resultEl.className = "error";
+                userInput.style.backgroundColor = "#fff3cd";
+            }
+        }
+
+        window.onload = function () {
+            teacherInput.focus();
+        };
+    </script>
+</body>
+
+</html>

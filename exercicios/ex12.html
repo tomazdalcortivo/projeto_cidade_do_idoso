@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Exercício 12: Poema Linha a Linha</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        textarea {
+            resize: none;
+            line-height: 1.5;
+            white-space: pre; 
+            overflow-x: auto; 
+        }
+
+        .line-report {
+            text-align: left;
+            margin: 20px auto;
+            max-width: 90%;
+            font-size: 20px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: white;
+            display: none; 
+        }
+
+        .line-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .line-ok { color: green; font-weight: bold; }
+        .line-error { color: red; }
+        .line-tip { color: #555; font-size: 18px; font-style: italic; display: block; margin-top: 2px;}
+    </style>
+</head>
+
+<body>
+    <h1>Exercício 12: Validação Linha a Linha</h1>
+    <div class="container">
+
+        <h3 style="margin-bottom: 5px;">1. Professor: Digite o poema (use Enter para pular linhas):</h3>
+        <textarea id="teacherInput" rows="8" placeholder="Digite o poema aqui..."></textarea>
+        <button onclick="setPoem()" id="setBtn">Definir Poema</button>
+        
+        <br>
+
+        <h3 style="margin-bottom: 5px;">2. Aluno: Digite abaixo (linha por linha):</h3>
+        <textarea id="userInput" rows="8" placeholder="O aluno digitará aqui..." disabled></textarea>
+        <button onclick="checkLineByLine()" id="checkBtn" disabled>Verificar Linhas</button>
+        
+        <div id="report" class="line-report"></div>
+        <p id="finalResult"></p>
+
+        <br><button onclick="location.href='menu.html'">Voltar ao Menu</button>
+    </div>
+
+    <script>
+        const teacherInput = document.getElementById('teacherInput');
+        const userInput = document.getElementById('userInput');
+        const reportEl = document.getElementById('report');
+        const finalResultEl = document.getElementById('finalResult');
+        const setBtn = document.getElementById('setBtn');
+        const checkBtn = document.getElementById('checkBtn');
+
+        function setPoem() {
+            const text = teacherInput.value.trim();
+
+            if (text === "") {
+                finalResultEl.textContent = "Por favor, digite algo primeiro.";
+                finalResultEl.className = "error";
+                return;
+            }
+
+            teacherInput.disabled = true;
+            teacherInput.style.backgroundColor = '#e0e0e0';
+            teacherInput.style.color = '#333';
+            setBtn.disabled = true;
+
+            userInput.disabled = false;
+            userInput.focus();
+            userInput.value = '';
+            userInput.style.backgroundColor = 'white';
+            checkBtn.disabled = false;
+            
+            finalResultEl.textContent = "";
+            reportEl.style.display = 'none';
+        }
+
+        function checkLineByLine() {
+            const teacherLines = teacherInput.value.trim().split('\n');
+            const userLines = userInput.value.trim().split('\n');
+
+            reportEl.innerHTML = ""; 
+            reportEl.style.display = "block";
+            
+            let allCorrect = true;
+            let errorCount = 0;
+
+            for (let i = 0; i < teacherLines.length; i++) {
+                const expected = teacherLines[i].trim(); 
+                const typed = (userLines[i] || "").trim(); 
+
+                const div = document.createElement('div');
+                div.className = 'line-item';
+
+                if (expected === "") {
+                    continue; 
+                }
+
+                if (typed === expected) {
+                    div.innerHTML = `<span class="line-ok">✔ Linha ${i + 1}: Correta</span>`;
+                } else {
+                    allCorrect = false;
+                    errorCount++;
+                    div.innerHTML = `
+                        <span class="line-error">❌ Linha ${i + 1}: Incorreta</span>
+                        <span class="line-tip">Esperado: "${expected}"</span>
+                    `;
+                }
+                reportEl.appendChild(div);
+            }
+
+            if (userLines.length > teacherLines.length) {
+                const div = document.createElement('div');
+                div.className = 'line-item';
+                div.innerHTML = `<span class="line-error">⚠️ Você digitou linhas a mais que o original.</span>`;
+                reportEl.appendChild(div);
+                allCorrect = false;
+            }
+
+            if (allCorrect) {
+                finalResultEl.textContent = "🎉 Parabéns! O poema está perfeito!";
+                finalResultEl.className = "success";
+                userInput.style.backgroundColor = "#c8f7c5";
+            } else {
+                finalResultEl.textContent = `Encontramos ${errorCount} erro(s). Veja o relatório acima.`;
+                finalResultEl.className = "error";
+                userInput.style.backgroundColor = "#fff3cd";
+            }
+        }
+    </script>
+</body>
+
+</html>
