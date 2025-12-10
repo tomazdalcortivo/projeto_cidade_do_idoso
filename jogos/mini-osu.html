@@ -3,9 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Clique no Alvo (Estilo Osu!)</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <title>Clique no Alvo (Estilo Osu!) - V2</title>
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background-color: #e0e0e0;
+            user-select: none;
+        }
+
         #game-area {
             position: relative;
             width: 800px;
@@ -13,9 +19,9 @@
             margin: 20px auto;
             border: 4px solid #333;
             overflow: hidden;
-            background-color: #f0f0f0;
+            background-color: #f9f9f9;
             border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             cursor: none;
         }
 
@@ -33,12 +39,13 @@
             position: absolute;
             width: 30px;
             height: 30px;
-            border: 3px solid #333;
+            border: 3px solid #ff4081;
             border-radius: 50%;
             pointer-events: none;
             transform: translate(-50%, -50%);
             z-index: 100;
-            background-color: rgba(255, 255, 255, 0.5);
+            background-color: rgba(255, 64, 129, 0.2);
+            transition: transform 0.05s ease-out;
         }
 
         .custom-cursor::after {
@@ -46,9 +53,9 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 4px;
-            height: 4px;
-            background-color: #333;
+            width: 6px;
+            height: 6px;
+            background-color: #ff4081;
             border-radius: 50%;
             transform: translate(-50%, -50%);
         }
@@ -65,20 +72,16 @@
             height: 100%;
             border-radius: 50%;
             background-color: #4CAF50;
-            border: 4px solid white;
+            border: 3px solid white;
             color: white;
-            font-size: 40px;
+            font-size: 24px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
             z-index: 2;
-            transition: transform 0.1s;
-        }
-
-        .hit-circle:active {
-            transform: scale(0.95);
+            cursor: pointer;
         }
 
         .approach-circle {
@@ -86,11 +89,12 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 4px solid #666;
+            border: 3px solid #555;
             opacity: 0.8;
-            top: -4px;
-            left: -4px;
+            top: -3px;
+            left: -3px;
             z-index: 1;
+            pointer-events: none;
         }
 
         @keyframes shrink {
@@ -106,13 +110,14 @@
         }
 
         .feedback {
-            font-size: 36px;
+            font-size: 28px;
             font-weight: bold;
             position: absolute;
             pointer-events: none;
-            animation: floatUp 1s forwards;
+            animation: floatUp 0.8s forwards;
             z-index: 10;
             text-shadow: 1px 1px 2px white;
+            white-space: nowrap;
         }
 
         @keyframes floatUp {
@@ -123,14 +128,14 @@
 
             100% {
                 opacity: 0;
-                transform: translateY(-30px) scale(1.2);
+                transform: translateY(-30px) scale(1.1);
             }
         }
 
         .score-panel {
             display: flex;
             justify-content: space-around;
-            font-size: 24px;
+            font-size: 20px;
             margin-bottom: 10px;
             font-weight: bold;
             background: #fff;
@@ -139,57 +144,96 @@
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .buttons-wrapper {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-top: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         button {
-            min-width: 200px;
-            height: 60px;
-            font-size: 20px;
-            padding: 10px;
+            flex: 1;
+            min-width: 150px;
+            height: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        button.easy {
+            background-color: #4CAF50;
+        }
+
+        button.medium {
+            background-color: #2196F3;
+        }
+
+        button.hard {
+            background-color: #FF9800;
+        }
+
+        button.insane {
+            background-color: #F44336;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .game-info {
+            height: 30px;
+            margin-top: 5px;
+            font-size: 18px;
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
-    <h1>Clique no Alvo</h1>
-    <div class="container">
-        <p style="font-size:22px; max-width: 800px; margin: 0 auto;">
-            Mova o mouse desenhando uma linha e clique nos números em ordem (1, 2, 3...)
-            quando o anel encostar no círculo.
-        </p>
+    <h1>Clique no Alvo - Treino de Reflexo</h1>
 
-        <div class="score-panel">
-            <span id="score">Pontuação: 0</span>
-            <span id="combo">Combo: 0</span>
-        </div>
+    <div class="score-panel">
+        <span id="score">Pontuação: 0</span>
+        <span id="combo">Combo: 0</span>
+    </div>
 
-        <p id="game-status" style="font-size: 24px; height: 30px; margin-top:5px; color: #333;"></p>
+    <div id="game-status" class="game-info" style="color: #333;">Selecione uma dificuldade</div>
 
-        <div id="game-area">
-            <canvas id="trail-canvas" width="800" height="500"></canvas>
-            <div id="cursor" class="custom-cursor" style="display:none;"></div>
-        </div>
+    <div id="game-area">
+        <canvas id="trail-canvas" width="800" height="500"></canvas>
+        <div id="cursor" class="custom-cursor" style="display:none;"></div>
+    </div>
 
-        <div class="buttons-wrapper">
-            <button onclick="newGame('medium')">Iniciar (Médio - Lento)</button>
-            <button onclick="newGame('hard')">Iniciar (Difícil - Rápido)</button>
-            <button onclick="location.href='menu.html'">Voltar</button>
-        </div>
+    <div class="buttons-wrapper">
+        <button class="easy" onclick="newGame('easy')">Fácil (Lento)</button>
+        <button class="medium" onclick="newGame('medium')">Médio (Normal)</button>
+        <button class="hard" onclick="newGame('hard')">Difícil (Rápido)</button>
+        <button class="insane" onclick="newGame('insane')">INSANO (Desafio)</button>
+        <button onclick="location.reload()" style="background-color: #999;">Reiniciar</button>
     </div>
 
     <script>
-        const CIRCLE_SIZE = 100;
-        const MAX_CIRCLES_ON_SCREEN = 2;
-
+        let currentCircleSize = 100;
         let currentApproachTime = 3000;
         let currentSpawnRate = 3000;
+        let maxCirclesOnScreen = 2;
+        let totalTargets = 20;
 
         const gameArea = document.getElementById('game-area');
         const scoreEl = document.getElementById('score');
@@ -207,52 +251,6 @@
         let gameInterval;
         let isPlaying = false;
 
-        gameArea.addEventListener('mousemove', (e) => {
-            const rect = gameArea.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            cursorEl.style.left = x + 'px';
-            cursorEl.style.top = y + 'px';
-            cursorEl.style.display = 'block';
-
-            trailPoints.push({
-                x: x,
-                y: y,
-                time: Date.now()
-            });
-        });
-
-        gameArea.addEventListener('mouseleave', () => {
-            cursorEl.style.display = 'none';
-        });
-
-        function renderTrail() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const now = Date.now();
-            trailPoints = trailPoints.filter(p => now - p.time < 500);
-
-            if (trailPoints.length < 2) {
-                requestAnimationFrame(renderTrail);
-                return;
-            }
-
-            ctx.beginPath();
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = 'rgba(108, 99, 255, 0.6)';
-            ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
-
-            for (let i = 1; i < trailPoints.length; i++) {
-                ctx.lineTo(trailPoints[i].x, trailPoints[i].y);
-            }
-
-            ctx.stroke();
-            requestAnimationFrame(renderTrail);
-        }
-        requestAnimationFrame(renderTrail);
-
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const audioCtx = new AudioContext();
 
@@ -265,32 +263,84 @@
 
             if (type === 'hit') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+                let pitch = 400 + (Math.min(combo, 20) * 20);
+                osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(pitch + 200, audioCtx.currentTime + 0.1);
+
                 gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.2);
+                osc.stop(audioCtx.currentTime + 0.15);
             } else if (type === 'miss') {
-                osc.type = 'triangle';
+                osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+
                 gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.3);
             }
         }
+
+        gameArea.addEventListener('mousemove', (e) => {
+            const rect = gameArea.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            cursorEl.style.left = x + 'px';
+            cursorEl.style.top = y + 'px';
+            cursorEl.style.display = 'block';
+
+            trailPoints.push({ x: x, y: y, time: Date.now() });
+        });
+
+        gameArea.addEventListener('mouseleave', () => {
+            cursorEl.style.display = 'none';
+        });
+
+        function renderTrail() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const now = Date.now();
+            trailPoints = trailPoints.filter(p => now - p.time < 300);
+
+            if (trailPoints.length < 2) {
+                requestAnimationFrame(renderTrail);
+                return;
+            }
+
+            ctx.beginPath();
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = 'rgba(255, 64, 129, 0.5)';
+
+            if (trailPoints.length > 0) ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
+
+            for (let i = 1; i < trailPoints.length; i++) {
+                const xc = (trailPoints[i].x + trailPoints[i - 1].x) / 2;
+                const yc = (trailPoints[i].y + trailPoints[i - 1].y) / 2;
+                ctx.quadraticCurveTo(trailPoints[i - 1].x, trailPoints[i - 1].y, xc, yc);
+            }
+
+            ctx.stroke();
+            requestAnimationFrame(renderTrail);
+        }
+        requestAnimationFrame(renderTrail);
 
         function createHitCircle(number) {
             if (!isPlaying) return;
 
             const container = document.createElement('div');
             container.className = 'hit-circle-container';
-            container.style.width = CIRCLE_SIZE + 'px';
-            container.style.height = CIRCLE_SIZE + 'px';
 
-            const maxX = gameArea.clientWidth - CIRCLE_SIZE;
-            const maxY = gameArea.clientHeight - CIRCLE_SIZE;
+            container.style.width = currentCircleSize + 'px';
+            container.style.height = currentCircleSize + 'px';
+
+            const maxX = gameArea.clientWidth - currentCircleSize;
+            const maxY = gameArea.clientHeight - currentCircleSize;
             container.style.left = Math.floor(Math.random() * maxX) + 'px';
             container.style.top = Math.floor(Math.random() * maxY) + 'px';
 
@@ -300,6 +350,8 @@
 
             const colors = ['#4CAF50', '#2196F3', '#FF9800', '#9C27B0'];
             circle.style.backgroundColor = colors[(number - 1) % colors.length];
+
+            if (currentCircleSize < 70) circle.style.fontSize = "18px";
 
             const ring = document.createElement('div');
             ring.className = 'approach-circle';
@@ -318,6 +370,10 @@
                 if (number === nextNumber) {
                     clicked = true;
                     handleHit(container, number);
+                } else {
+                    playSound('miss');
+                    combo = 0;
+                    updateStats();
                 }
             });
 
@@ -332,16 +388,26 @@
 
         function handleHit(element, number) {
             clearTimeout(element.dataset.timer);
-            showFeedback(element.style.left, element.style.top, "Ótimo!", 'green');
+
+            let msg = "Bom!";
+            let color = "#8BC34A";
+
+            if (combo > 5) { msg = "Ótimo!"; color = "#4CAF50"; }
+            if (combo > 10) { msg = "Incrível!"; color = "#2196F3"; }
+            if (combo > 20) { msg = "PERFEITO!"; color = "#E91E63"; }
+
+            showFeedback(element.style.left, element.style.top, msg, color);
             playSound('hit');
+
             gameArea.removeChild(element);
-            score += 10 + combo;
+
+            score += 50 + (combo * 10);
             combo++;
             nextNumber++;
             updateStats();
 
-            if (number === 15) {
-                endGame("Parabéns! Sessão concluída com sucesso!", true);
+            if (number === totalTargets) {
+                endGame(`Parabéns! Você completou o nível!`, true);
             }
         }
 
@@ -349,9 +415,10 @@
             if (!gameArea.contains(element)) return;
 
             if (number === nextNumber) {
-                showFeedback(element.style.left, element.style.top, "Ops...", 'orange');
+                showFeedback(element.style.left, element.style.top, "X", 'red');
                 playSound('miss');
                 combo = 0;
+
                 gameArea.removeChild(element);
                 nextNumber++;
             } else {
@@ -365,12 +432,12 @@
             el.className = 'feedback';
             el.textContent = text;
             el.style.color = color;
-            el.style.left = (parseInt(left) + CIRCLE_SIZE / 4) + 'px';
+            el.style.left = (parseInt(left) + currentCircleSize / 2 - 20) + 'px';
             el.style.top = top;
             gameArea.appendChild(el);
             setTimeout(() => {
                 if (gameArea.contains(el)) gameArea.removeChild(el);
-            }, 1000);
+            }, 800);
         }
 
         function updateStats() {
@@ -382,37 +449,70 @@
             if (!isPlaying) return;
             const currentCircles = document.querySelectorAll('.hit-circle-container').length;
 
-            if (currentCircles < MAX_CIRCLES_ON_SCREEN && (nextNumber + currentCircles) <= 15) {
-                createHitCircle(nextNumber + currentCircles);
-            } else if (currentCircles === 0 && nextNumber > 15) {
+            if (currentCircles < maxCirclesOnScreen && (nextNumber + currentCircles) <= totalTargets) {
+                let maxOnScreen = nextNumber - 1;
+                document.querySelectorAll('.hit-circle').forEach(el => {
+                    const num = parseInt(el.textContent);
+                    if (num > maxOnScreen) maxOnScreen = num;
+                });
+
+                if (maxOnScreen < totalTargets) {
+                    createHitCircle(maxOnScreen + 1);
+                }
+            } else if (currentCircles === 0 && nextNumber > totalTargets) {
                 endGame("Sessão Finalizada!", true);
             }
         }
 
         function newGame(difficulty) {
-            if (difficulty === 'medium') {
-                currentApproachTime = 6000;
-                currentSpawnRate = 6000;
-                statusEl.textContent = "Modo Médio: Bem devagar...";
-            } else {
-                currentApproachTime = 3000;
-                currentSpawnRate = 3000;
-                statusEl.textContent = "Modo Difícil: Atenção!";
-            }
-            statusEl.style.color = "#333";
-
-            const hitCircles = document.querySelectorAll('.hit-circle-container');
-            hitCircles.forEach(el => gameArea.removeChild(el));
-            const feedbacks = document.querySelectorAll('.feedback');
-            feedbacks.forEach(el => gameArea.removeChild(el));
-
+            const items = document.querySelectorAll('.hit-circle-container, .feedback');
+            items.forEach(el => el.remove());
             clearInterval(gameInterval);
 
             score = 0;
             combo = 0;
             nextNumber = 1;
-            updateStats();
             isPlaying = true;
+            updateStats();
+
+            switch (difficulty) {
+                case 'easy':
+                    currentApproachTime = 4000;
+                    currentSpawnRate = 2000;
+                    currentCircleSize = 110;
+                    maxCirclesOnScreen = 2;
+                    totalTargets = 25;
+                    statusEl.textContent = "Modo Fácil: Relaxe e clique.";
+                    statusEl.style.color = "#4CAF50";
+                    break;
+                case 'medium':
+                    currentApproachTime = 2500;
+                    currentSpawnRate = 1200;
+                    currentCircleSize = 90;
+                    maxCirclesOnScreen = 3;
+                    totalTargets = 30;
+                    statusEl.textContent = "Modo Médio: Aqueça os dedos.";
+                    statusEl.style.color = "#2196F3";
+                    break;
+                case 'hard':
+                    currentApproachTime = 1500;
+                    currentSpawnRate = 800;
+                    currentCircleSize = 75;
+                    maxCirclesOnScreen = 4;
+                    totalTargets = 40;
+                    statusEl.textContent = "Modo Difícil: Mantenha o foco!";
+                    statusEl.style.color = "#FF9800";
+                    break;
+                case 'insane':
+                    currentApproachTime = 1200;
+                    currentSpawnRate = 700;
+                    currentCircleSize = 70;
+                    maxCirclesOnScreen = 5;
+                    totalTargets = 45;
+                    statusEl.textContent = "Modo INSANO: Boa sorte...";
+                    statusEl.style.color = "#F44336";
+                    break;
+            }
 
             createHitCircle(1);
             gameInterval = setInterval(gameLoop, currentSpawnRate);
@@ -421,13 +521,12 @@
         function endGame(msg, success) {
             isPlaying = false;
             clearInterval(gameInterval);
-
-            const hitCircles = document.querySelectorAll('.hit-circle-container');
-            hitCircles.forEach(el => gameArea.removeChild(el));
-
             statusEl.textContent = msg;
-            statusEl.style.color = success ? "green" : "red";
-            if (success) playSound('hit');
+            statusEl.style.color = success ? "#4CAF50" : "#F44336";
+
+            setTimeout(() => {
+                document.querySelectorAll('.hit-circle-container').forEach(el => el.remove());
+            }, 500);
         }
     </script>
 </body>
